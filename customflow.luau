@@ -1,4 +1,7 @@
--- still vibecode
+--==========================================================================
+--  Kicia Rebuild  -  Rivals
+--  Kiciahook v3, rebuilt from a decompiled build.
+--==========================================================================
 if getgenv().KiciaRebuild and getgenv().KiciaRebuild.Unload then
     pcall(getgenv().KiciaRebuild.Unload)
 end
@@ -2728,7 +2731,9 @@ local v120 = tbl17.A()
 local color = Color3.fromRGB(255, 255, 255)
 local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 local tweenInfo2 = TweenInfo.new(v86[62], Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local color2 = Color3.fromRGB(v86[102], 92, v86[53])
+local function color2()
+    return v120.get("Accent")
+end
 
 local function fn36(arg, arg2)
 local clamp = math.clamp
@@ -2901,7 +2906,7 @@ v118.connectClick(arg2.Trove, instance, function()
 if v121 == nil then
 local v122 = arg2.Trove:Extend()
 v121 = v122
-menu:Tween(textLabel, { TextColor3 = color2 }, tweenInfo)
+menu:Tween(textLabel, { TextColor3 = color2() }, tweenInfo)
 
 v122:Add(task.spawn(function()
 for i = v86[155], 1, -1 do
@@ -7807,7 +7812,7 @@ local function fn43(arg, arg2, arg3)
 local menu = arg._menu
 local instance = Instance.new(v86[128])
 instance.LayoutOrder = -1
-scrollingFrame.Position = UDim2.fromOffset(v86[186], v86[192])
+arg2.Scroll.Position = UDim2.fromOffset(v86[186], v86[192])
 instance.ClipsDescendants = true
 instance.BorderSizePixel = 0
 arg3.Batch:Bind(instance, "BackgroundColor3", "Background")
@@ -15623,7 +15628,7 @@ imageLabel.BackgroundTransparency = 1
 imageLabel.Position = UDim2.fromScale(v86[101], v86[101])
 imageLabel.Size = UDim2.fromOffset(rail.LogoSize.X, rail.LogoSize.Y)
 imageLabel.BorderSizePixel = v86[186]
-if image ~= nil and image == K.LithiumLogo then
+if image ~= nil and image == K.LithiumLogo and not K.LithiumLogoColorize then
 imageLabel.ImageColor3 = Color3.new(1, 1, 1)
 imageLabel.ScaleType = Enum.ScaleType.Fit
 else
@@ -16253,7 +16258,7 @@ instance.Image = image
 instance.BackgroundTransparency = 1
 instance.Size = UDim2.fromOffset(20, 20)
 instance.BorderSizePixel = 0
-if image ~= nil and image == K.LithiumLogo then
+if image ~= nil and image == K.LithiumLogo and not K.LithiumLogoColorize then
 instance.ImageColor3 = Color3.new(1, 1, 1)
 instance.ScaleType = Enum.ScaleType.Fit
 else
@@ -18088,10 +18093,13 @@ if arg.ResolveFont ~= nil then
 Default = arg.ResolveFont("Default")
 end
 
+K.LithiumLogo = arg.Icon or "rbxassetid://98418090695443"
+K.LithiumLogoColorize = true
+
+
 local obj = setmetatable({
 _trove = v136,
 Title = arg.Title or "khook.lua",
-K.LithiumLogo = "rbxassetid://98418090695443"
 Icon = arg.Icon or "rbxassetid://98418090695443",
 Directory = directory,
 ConfigVersion = arg.ConfigVersion or v86[63],
@@ -47901,7 +47909,21 @@ end
 do -- gb
 local function fn35()
 local v115 = tbl17.fV()
-return function(I,W,N,P,a)local e,c,E= v115 (I:GetPivot().Position);if E then I=N/1080/(c*W*2)*1000;local l,W=4*I*(P or 1),6.5*I*(a or 1);return Vector2.new(e.X-l/2,e.Y-W/2):Floor(),(Vector2.new(math.max(8,l),math.max(13,W)):Floor());else return nil,nil;end;end
+return function(I,W,N,P,a)
+    if I == nil or not I:IsA("Model") or I.PrimaryPart == nil and I:FindFirstChild("HumanoidRootPart") == nil then
+        return nil, nil
+    end
+    local ok, pivot = pcall(function() return I:GetPivot() end)
+    if not ok or pivot == nil then return nil, nil end
+    local e,c,E = v115(pivot.Position)
+    if E then
+        local n = N/1080/(c*W*2)*1000
+        local l,W = 4*n*(P or 1), 6.5*n*(a or 1)
+        return Vector2.new(e.X-l/2,e.Y-W/2):Floor(), Vector2.new(math.max(8,l),math.max(13,W)):Floor()
+    else
+        return nil, nil
+    end
+end
 end
 
 tbl17.gb = function()
@@ -48263,10 +48285,14 @@ local aliveState = arg2.AliveState
 local n = 0
 local cullHeavyOperations = true
 
-if aliveState ~= nil then
-local n33 = aliveState.RootPart.Position - frame.CameraPosition
-n = n33:Dot(n33)
-cullHeavyOperations = n > 160000
+if aliveState ~= nil and aliveState.RootPart ~= nil then
+    local n33 = aliveState.RootPart.Position - frame.CameraPosition
+    n = n33:Dot(n33)
+    cullHeavyOperations = n > 160000
+elseif aliveState ~= nil then
+    -- RootPart мёртв, но Died ещё не отстрелил: пропускаем кадр
+    esp:SetPanesVisible(false)
+    return
 end
 
 if v126 then
@@ -66532,5 +66558,33 @@ function K.Unload()
     pcall(function() GlobalTrove:Destroy() end)
     if getgenv().KiciaRebuild == K then getgenv().KiciaRebuild = nil end
 end
+
+--  Своя иконка меню и watermark с GitHub
+K.LithiumLogo = (function()
+    local URL  = "https://raw.githubusercontent.com/1w1f-afk/customflowrecode/main/images/noFilter.png"
+    local PATH = "customflow/cache/menu_logo.png"
+
+    local isf = K.fn("isfile") or isfile
+    local wrf = K.fn("writefile") or writefile
+    local gca = K.fn("getcustomasset") or K.fn("getsynasset")
+
+    if not (wrf and gca) then return nil end
+
+    if isf and not isf(PATH) then
+        local ok, data = pcall(game.HttpGet, game, URL)
+        if not ok or type(data) ~= "string" or #data == 0 then
+            warn("[CustomFlow] can't download icon from github =(")
+            return nil
+        end
+        local ok2 = pcall(wrf, PATH, data)
+        if not ok2 then return nil end
+    end
+
+    local ok3, id = pcall(gca, PATH)
+    if ok3 and type(id) == "string" then
+        return id
+    end
+    return nil
+end)()
 
 tbl17.j1()(boot)
