@@ -1,7 +1,4 @@
---==========================================================================
---  Kicia Rebuild  -  Rivals
---  Kiciahook v3, rebuilt from a decompiled build.
---==========================================================================
+-- CustomFlow
 if getgenv().KiciaRebuild and getgenv().KiciaRebuild.Unload then
     pcall(getgenv().KiciaRebuild.Unload)
 end
@@ -51,7 +48,7 @@ function K.track(c) K.connections[#K.connections + 1] = c return c end
 function K.onUnload(f) K.cleanups[#K.cleanups + 1] = f end
 
 --==========================================================================
---  Signal / Trove (Kicia's own small versions)
+--  Signal / Trove (cool hacl's own small versions)
 --==========================================================================
 local Signal = {}
 Signal.__index = Signal
@@ -150,7 +147,7 @@ Trove.Destroy = Trove.Clean
 K.Trove = Trove
 
 --==========================================================================
---  Kicia's constant pool (v86[...]) as recovered from usage in the dump
+--  cool hack's constant pool (v86[...]) as recovered from usage in the dump
 --==========================================================================
 local C = {
     [3] = "Toggle", [9] = 20, [12] = 12, [18] = "0", [26] = 4, [34] = true, [44] = "Enabled",
@@ -163,7 +160,7 @@ local C = {
 K.C = C
 
 --==========================================================================
---  Kicia's own UI, settings store and Combat menu (lifted from the dump)
+--  cool hack's own UI, settings store and Combat menu (lifted from the dump)
 --==========================================================================
 local v86 = {
     [2] = "ReactiveStore",
@@ -354,7 +351,7 @@ local v86 = {
     [199] = "Unload",
     [200] = 26,
 }
---  Environment Kicia's modules expect: the module table and the aliases its
+--  Environment cool hack's modules expect: the module table and the aliases its
 --  loader set up before them (v102 = rawget, v103 = rawset, v107 = pcall).
 local tbl17 = { cache = {} }
 local v102, v103, v107 = rawget, rawset, pcall
